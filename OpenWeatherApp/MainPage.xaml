@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             BackgroundColor="#000B73"
+             x:Class="OpenWeatherApp.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25">
+            <Image
+            Source="wheatherIcon.jpg"
+            HeightRequest="185"
+            Aspect="AspectFit"/>
+
+            <Label
+            Text="Welcome to wheather broadcast"
+            Style="{StaticResource Headline}"/>
+
+            <Label
+            Text="{Binding WheatherToday, StringFormat='Temperature: {0} °C'}"
+            Style="{StaticResource SubHeadline}" />
+
+            <Label
+            Text="{Binding Wind.speed, StringFormat='Wind Speed: {0} km/h'}"
+            Style="{StaticResource SubHeadline}" />            
+
+            <Label
+            Text="{Binding Clouds, StringFormat='Clouds: {0} '}"
+            Style="{StaticResource SubHeadline}" />
+
+            <Label
+            Text="{Binding Humidity, StringFormat='Humidity: {0}%'}"
+            Style="{StaticResource SubHeadline}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
