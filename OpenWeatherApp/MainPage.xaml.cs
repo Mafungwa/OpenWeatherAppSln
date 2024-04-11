@@ -11,6 +11,7 @@ namespace OpenWeatherApp
         private int _humidity;
         private int _currentlocation;
 
+        private Location _gpsLocation;
 
         public float WheatherToday
         {
@@ -62,13 +63,20 @@ namespace OpenWeatherApp
             BindingContext = this;
             _broadcast = new HttpClient();
             _broadcast.DefaultRequestHeaders.Add("Accept", "application/json");
+        }
+
+        protected async override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            await GetCurrentLocation();
             GetWheather(_broadcast);
-            GetCurrentLocation();
+
         }
 
         public async void GetWheather(object parameters)
         {
-            string response = await _broadcast.GetStringAsync(new Uri("https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid=0bf31966051443f8bd4d70bfd5f3e356&units=metric"));
+            string response = await _broadcast.GetStringAsync(new Uri($"https://api.openweathermap.org/data/2.5/weather?lat={_gpsLocation.Latitude}&lon={_gpsLocation.Longitude}&appid=0bf31966051443f8bd4d70bfd5f3e356&units=metric"));
 
             Rootobject todayWheather = JsonConvert.DeserializeObject<Rootobject>(response);
 
@@ -88,36 +96,27 @@ namespace OpenWeatherApp
         {
             try
             {
-                _isCheckingLocation = true;
+                _gpsLocation = await Geolocation.Default.GetLocationAsync();
 
-                GeolocationRequest request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-
-                _cancelTokenSource = new CancellationTokenSource();
-
-                Location location = await Geolocation.Default.GetLocationAsync(request, _cancelTokenSource.Token);
-
-                if (location != null)
-                    Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
             }
-            // Catch one of the following exceptions:
-            //   FeatureNotSupportedException
-            //   FeatureNotEnabledException
-            //   PermissionException
+            catch (FeatureNotSupportedException fnsEx)
+            {
+                // Handle not supported on device exception
+            }
+            catch (FeatureNotEnabledException fneEx)
+            {
+                // Handle not enabled on device exception
+            }
+            catch (PermissionException pEx)
+            {
+                // Handle permission exception
+            }
             catch (Exception ex)
             {
                 // Unable to get location
             }
-            finally
-            {
-                _isCheckingLocation = false;
-            }
         }
 
-        public void CancelRequest()
-        {
-            if (_isCheckingLocation && _cancelTokenSource != null && _cancelTokenSource.IsCancellationRequested == false)
-                _cancelTokenSource.Cancel();
-        }
         public async void GetWeatherForCity(string city)
         {
             try
